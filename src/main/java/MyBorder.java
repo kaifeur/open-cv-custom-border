@@ -2,11 +2,28 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
+/**
+ * Данный класс представляет собой набор методов для создания рамок разных типов.
+ */
 public class MyBorder {
     private MyBorder() {
     }
 
-    public static void makeBorder(final Mat src, final Mat dst, final int top, final int bottom, final int left, final int rigth, final BorderType borderType, final Scalar color) {
+    /**
+     * Создает рамку типа borderType.
+     *
+     * @param src        исходная матрица
+     * @param dst        матрица назначения
+     * @param top        размер рамки сверху
+     * @param bottom     снизу
+     * @param left       слева
+     * @param rigth      справа
+     * @param borderType тип рамки (see {@link BorderType}
+     * @param color      цвет рамки
+     */
+    public static void makeBorder(final Mat src, final Mat dst, final int top,
+                                  final int bottom, final int left, final int rigth,
+                                  final BorderType borderType, final Scalar color) {
         switch (borderType) {
             case CONSTANT:
                 makeConstantBorder(src, dst, top, bottom, left, rigth, color);
@@ -22,13 +39,24 @@ public class MyBorder {
         }
     }
 
-    private static Mat createExtendedMat(final Mat src, final int top, final int bottom, final int left, final int rigth) {
+    /**
+     * Создает расширенную матрицу, содержащую исходную в центре.
+     *
+     * @return новую матрицу
+     */
+    private static Mat createExtendedMat(final Mat src, final int top,
+                                         final int bottom, final int left, final int rigth) {
         final Mat temp = new Mat(src.rows() + top + bottom, src.cols() + left + rigth, src.type());
         src.copyTo(temp.colRange(left, left + src.cols()).rowRange(top, top + src.rows()));
         return temp;
     }
 
-    private static void makeConstantBorder(final Mat src, final Mat dst, final int top, final int bottom, final int left, final int rigth, final Scalar color) {
+    /**
+     * Добавляет рамку определенного цвета.
+     */
+    private static void makeConstantBorder(final Mat src, final Mat dst,
+                                           final int top, final int bottom, final int left,
+                                           final int rigth, final Scalar color) {
         final Mat temp = createExtendedMat(src, top, bottom, left, rigth);
         temp.rowRange(0, top).setTo(color);
         temp.rowRange(top + src.rows(), temp.rows()).setTo(color);
@@ -37,9 +65,14 @@ public class MyBorder {
         temp.copyTo(dst);
     }
 
-    private static void makeReflectBorder(final Mat src, final Mat dst, final int top, final int bottom, final int left, final int rigth) {
+    /**
+     * Добавляет зеркальную рамку.
+     */
+    private static void makeReflectBorder(final Mat src, final Mat dst, final int top,
+                                          final int bottom, final int left, final int rigth) {
         if (left > src.cols() || rigth > src.cols() || top > src.rows() || bottom > src.rows()) {
-            throw new IllegalArgumentException("Border size can't be more than image size when border type is REFLECT");
+            throw new IllegalArgumentException("Border size can't " +
+                    "be more than image size when border type is REFLECT");
         }
         final Mat temp = createExtendedMat(src, top, bottom, left, rigth);
 
@@ -59,7 +92,8 @@ public class MyBorder {
 //        }
 
         //right
-        Core.flip(src.colRange(src.cols() - rigth, src.cols()), temp.colRange(left + src.rows(), temp.cols()).rowRange(top, top + src.rows()), 1);
+        Core.flip(src.colRange(src.cols() - rigth, src.cols()),
+                temp.colRange(left + src.rows(), temp.cols()).rowRange(top, top + src.rows()), 1);
 
 //        for (int i = 0; i < top; i++) {
 //            for (int j = left; j < left + src.rows(); j++) {
@@ -77,24 +111,32 @@ public class MyBorder {
 //        }
 
         //bottom
-        Core.flip(src.rowRange(src.rows() - bottom, src.rows()), temp.colRange(left, left + src.cols()).rowRange(top + src.rows(), temp.rows()), 0);
+        Core.flip(src.rowRange(src.rows() - bottom, src.rows()),
+                temp.colRange(left, left + src.cols()).rowRange(top + src.rows(), temp.rows()), 0);
 
         //top-left corner
         Core.flip(src.colRange(0, left).rowRange(0, top), temp.colRange(0, left).rowRange(0, top), -1);
 
         //top-right corner
-        Core.flip(src.colRange(src.cols() - rigth, src.cols()).rowRange(0, top), temp.colRange(left + src.cols(), temp.cols()).rowRange(0, top), -1);
+        Core.flip(src.colRange(src.cols() - rigth, src.cols()).rowRange(0, top),
+                temp.colRange(left + src.cols(), temp.cols()).rowRange(0, top), -1);
 
         //bottom-left corner
-        Core.flip(src.colRange(0, left).rowRange(src.rows() - bottom, src.rows()), temp.colRange(0, left).rowRange(top + src.rows(), temp.rows()), -1);
+        Core.flip(src.colRange(0, left).rowRange(src.rows() - bottom, src.rows()),
+                temp.colRange(0, left).rowRange(top + src.rows(), temp.rows()), -1);
 
         //bottom-right corner
-        Core.flip(src.colRange(src.cols() - rigth, src.cols()).rowRange(src.rows() - bottom, src.rows()), temp.colRange(left + src.cols(), temp.cols()).rowRange(top + src.rows(), temp.rows()), -1);
+        Core.flip(src.colRange(src.cols() - rigth, src.cols()).rowRange(src.rows() - bottom, src.rows()),
+                temp.colRange(left + src.cols(), temp.cols()).rowRange(top + src.rows(), temp.rows()), -1);
 
         temp.copyTo(dst);
     }
 
-    private static void makeReplicateBorder(final Mat src, final Mat dst, final int top, final int bottom, final int left, final int rigth) {
+    /**
+     * Добавляет рамку, повторяющую крайний пиксель.
+     */
+    private static void makeReplicateBorder(final Mat src, final Mat dst, final int top,
+                                            final int bottom, final int left, final int rigth) {
         final Mat temp = createExtendedMat(src, top, bottom, left, rigth);
 
         for (int i = top; i < top + src.rows(); i++) {
@@ -148,6 +190,9 @@ public class MyBorder {
         temp.copyTo(dst);
     }
 
+    /**
+     * Возможные типы рамок.
+     */
     public enum BorderType {
         CONSTANT,
         REFLECT,

@@ -7,11 +7,19 @@ import org.opencv.imgcodecs.Imgcodecs;
 import java.util.Random;
 
 public class BorderMaker {
+    /* Подгружает библиотеку OpenCV() из подключенной зависимости.
+     */
     static {
         nu.pattern.OpenCV.loadShared();
         System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
     }
 
+    /**
+     * Точка входа в программу.
+     * В качестве аргумента можно передать путь до исходного изображения.
+     *
+     * @param args 1 - путь до изображения
+     */
     public static void main(String[] args) {
         Mat src;
         Mat dstRef = new Mat(), dstConst = new Mat(), dstRep = new Mat(),
@@ -20,6 +28,7 @@ public class BorderMaker {
 
         int top, bottom, left, right;
 
+        //Имена окон
         String origReflectWindow = "copyMakeBorder - Reflect";
         String myReflectWindow = "MyBorder - Reflect";
         String diffReflectWindow = "Diff - Reflect";
@@ -32,6 +41,7 @@ public class BorderMaker {
         String myRepWindow = "MyBorder - Replicate";
         String diffRepWindow = "Diff - Replicate";
 
+        //Проверка наличия параметра-пути
         String imageName = ((args.length > 0) ? args[0] : "/Users/keet/Lenna.png");
         src = Imgcodecs.imread(imageName, Imgcodecs.IMREAD_COLOR);
 
@@ -41,15 +51,18 @@ public class BorderMaker {
             System.exit(-1);
         }
 
+        //Размеры рамок
         top = (int) (0.05 * src.rows());
         bottom = top;
         left = (int) (0.05 * src.cols());
         right = left;
 
+        //Задание случайного цвета для Constant-рамки
         Random random = new Random();
         Scalar color = new Scalar(random.nextInt(256),
                 random.nextInt(256), random.nextInt(256));
 
+        //Создание рамок разных типов
         Core.copyMakeBorder(src, dstRef, top, bottom, left, right, Core.BORDER_REFLECT, color);
         MyBorder.makeBorder(src, dstMyRef, top, bottom, left, right, MyBorder.BorderType.REFLECT, color);
 
@@ -59,6 +72,7 @@ public class BorderMaker {
         Core.copyMakeBorder(src, dstRep, top, bottom, left, right, Core.BORDER_REPLICATE, color);
         MyBorder.makeBorder(src, dstMyRep, top, bottom, left, right, MyBorder.BorderType.REPLICATE, color);
 
+        //Создание окон
         HighGui.namedWindow(origReflectWindow, HighGui.WINDOW_AUTOSIZE);
         HighGui.namedWindow(myReflectWindow, HighGui.WINDOW_AUTOSIZE);
         HighGui.namedWindow(diffReflectWindow, HighGui.WINDOW_AUTOSIZE);
@@ -75,6 +89,7 @@ public class BorderMaker {
         Core.subtract(dstConst, dstMyConst, constDiff);
         Core.subtract(dstRep, dstMyRep, repDiff);
 
+        //Цикл отрисовки изображения и ожидания кнопки ESC для выхода
         while (true) {
             HighGui.imshow(origReflectWindow, dstRef);
             HighGui.imshow(myReflectWindow, dstMyRef);
