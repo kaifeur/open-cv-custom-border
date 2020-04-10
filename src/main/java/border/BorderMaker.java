@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Данный класс представляет собой набор методов для создания рамок разных типов.
+ * Simple border maker.
+ * Used to create some borders (reflect, replicate and constant types).
+ * Powered by OpenCV API.
  */
 public class BorderMaker {
     private final Logger logger = LoggerFactory.getLogger(BorderMaker.class);
@@ -54,7 +56,7 @@ public class BorderMaker {
     }
 
     /**
-     * Создает расширенную матрицу, содержащую исходную в центре.
+     * Creates extended image matrix, with original image in center.
      */
     private void extendImageForBorderSize() {
         int height = originalImage.rows() + topBorderSize + bottomBorderSize;
@@ -66,9 +68,6 @@ public class BorderMaker {
         currentImage = temp.clone();
     }
 
-    /**
-     * Добавляет рамку определенного цвета.
-     */
     private void makeConstantBorder(final Scalar borderColor) {
         logger.info("Making constant border with color {}", borderColor);
         currentImage.rowRange(0, topBorderSize).setTo(borderColor);
@@ -79,9 +78,6 @@ public class BorderMaker {
                 currentImage.cols()).setTo(borderColor);
     }
 
-    /**
-     * Добавляет зеркальную рамку.
-     */
     private void makeReflectBorder() {
         logger.info("Making reflect border");
         checkBorderMakingPossibility();
@@ -171,9 +167,6 @@ public class BorderMaker {
                         .rowRange(topBorderSize + originalImage.rows(), currentImage.rows()), -1);
     }
 
-    /**
-     * Добавляет рамку, повторяющую крайний пиксель.
-     */
     private void makeReplicateBorder() {
         logger.info("Making replicated border");
         makeLeftAndRightSideBorderWithEdgeColor();
