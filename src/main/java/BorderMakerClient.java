@@ -105,19 +105,20 @@ public class BorderMakerClient {
         Core.subtract(opencvConstResult, bMakerConstantResult, constantDiff);
         Core.subtract(opencvReplicateResult, bMakerReplicateResult, replicateDiff);
 
+        HighGui.imshow(origReflectWindow, opencvReflectResult);
+        HighGui.imshow(myReflectWindow, bMakerReflectResult);
+        HighGui.imshow(diffReflectWindow, reflectDiff);
+
+        HighGui.imshow(origConstWindow, opencvConstResult);
+        HighGui.imshow(myConstWindow, bMakerConstantResult);
+        HighGui.imshow(diffConstWindow, constantDiff);
+
+        HighGui.imshow(origRepWindow, opencvReplicateResult);
+        HighGui.imshow(myRepWindow, bMakerReplicateResult);
+        HighGui.imshow(diffRepWindow, replicateDiff);
+
         while (true) {
-            HighGui.imshow(origReflectWindow, opencvReflectResult);
-            HighGui.imshow(myReflectWindow, bMakerReflectResult);
-            HighGui.imshow(diffReflectWindow, reflectDiff);
-
-            HighGui.imshow(origConstWindow, opencvConstResult);
-            HighGui.imshow(myConstWindow, bMakerConstantResult);
-            HighGui.imshow(diffConstWindow, constantDiff);
-
-            HighGui.imshow(origRepWindow, opencvReplicateResult);
-            HighGui.imshow(myRepWindow, bMakerReplicateResult);
             HighGui.imshow(diffRepWindow, replicateDiff);
-
             char pressedKey = (char) HighGui.waitKey(500);
             pressedKey = Character.toLowerCase(pressedKey);
             if (pressedKey == ESCAPE_CODE) {
