@@ -49,6 +49,7 @@ public class BorderMaker {
         }
         final Mat result = new Mat();
         currentImage.copyTo(result);
+        logger.info("Successfully created image with border type {}: {}", borderType, result);
         return result;
     }
 
@@ -56,8 +57,10 @@ public class BorderMaker {
      * Создает расширенную матрицу, содержащую исходную в центре.
      */
     private void extendImageForBorderSize() {
-        final Mat temp = new Mat(originalImage.rows() + topBorderSize + bottomBorderSize,
-                originalImage.cols() + leftBorderSize + rigthBorderSize, originalImage.type());
+        int height = originalImage.rows() + topBorderSize + bottomBorderSize;
+        int width = originalImage.cols() + leftBorderSize + rigthBorderSize;
+        logger.info("Extending image for {}x{} size", height, width);
+        final Mat temp = new Mat(height, width, originalImage.type());
         originalImage.copyTo(temp.colRange(leftBorderSize, leftBorderSize + originalImage.cols())
                 .rowRange(topBorderSize, topBorderSize + originalImage.rows()));
         currentImage = temp.clone();
@@ -67,6 +70,7 @@ public class BorderMaker {
      * Добавляет рамку определенного цвета.
      */
     private void makeConstantBorder(final Scalar borderColor) {
+        logger.info("Making constant border with color {}", borderColor);
         currentImage.rowRange(0, topBorderSize).setTo(borderColor);
         currentImage.rowRange(topBorderSize + originalImage.rows(),
                 currentImage.rows()).setTo(borderColor);
@@ -79,6 +83,7 @@ public class BorderMaker {
      * Добавляет зеркальную рамку.
      */
     private void makeReflectBorder() {
+        logger.info("Making reflect border");
         checkBorderMakingPossibility();
 
         doSideFlips();
@@ -86,6 +91,7 @@ public class BorderMaker {
     }
 
     private void checkBorderMakingPossibility() {
+        logger.info("Checking border making possibility (check image and border sizes)");
         if (!isImageSizeEnough()) {
             throw new IllegalArgumentException("Border size can't " +
                     "be more than tempImage size when border type is REFLECT");
@@ -169,6 +175,7 @@ public class BorderMaker {
      * Добавляет рамку, повторяющую крайний пиксель.
      */
     private void makeReplicateBorder() {
+        logger.info("Making replicated border");
         makeLeftAndRightSideBorderWithEdgeColor();
         makeTopAndBottomSideBorderWithEdgeColor();
         makeTopCornerBorderWithEdgeColor();
