@@ -56,10 +56,10 @@ public class BorderMaker {
      * Создает расширенную матрицу, содержащую исходную в центре.
      */
     private void extendImageForBorderSize() {
-        final Mat temp = new Mat(currentImage.rows() + topBorderSize + bottomBorderSize,
-                currentImage.cols() + leftBorderSize + rigthBorderSize, currentImage.type());
-        currentImage.copyTo(temp.colRange(leftBorderSize, leftBorderSize + currentImage.cols())
-                .rowRange(topBorderSize, topBorderSize + currentImage.rows()));
+        final Mat temp = new Mat(originalImage.rows() + topBorderSize + bottomBorderSize,
+                originalImage.cols() + leftBorderSize + rigthBorderSize, originalImage.type());
+        originalImage.copyTo(temp.colRange(leftBorderSize, leftBorderSize + originalImage.cols())
+                .rowRange(topBorderSize, topBorderSize + originalImage.rows()));
         currentImage = temp.clone();
     }
 
@@ -81,7 +81,6 @@ public class BorderMaker {
      * Добавляет зеркальную рамку.
      */
     private void makeReflectBorder() {
-        currentImage = originalImage.clone();
         checkBorderMakingPossibility();
 
         doSideFlips();
@@ -174,51 +173,64 @@ public class BorderMaker {
     private void makeReplicateBorder() {
         currentImage = originalImage.clone();
 
+        makeLeftAndRightSideBorderWithEdgeColor();
+        makeTopAndBottomSideBorderWithEdgeColor();
+        makeTopCornerBorderWithEdgeColor();
+        makeBottomCornerBorderWithEdgeColor();
+    }
+
+    private void makeLeftAndRightSideBorderWithEdgeColor() {
         for (int i = topBorderSize; i < topBorderSize + originalImage.rows(); i++) {
-            double[] leftBorderSizeColor = originalImage.get(i - topBorderSize, 0);
+            double[] leftBorderColor = originalImage.get(i - topBorderSize, 0);
             for (int j = 0; j < leftBorderSize; j++) {
-                currentImage.put(i, j, leftBorderSizeColor);
+                currentImage.put(i, j, leftBorderColor);
             }
 
-            double[] rightColor = originalImage.get(i - topBorderSize, originalImage.cols() - 1);
+            double[] rightBorderColor = originalImage.get(i - topBorderSize, originalImage.cols() - 1);
             for (int j = leftBorderSize + originalImage.cols(); j < currentImage.cols(); j++) {
-                currentImage.put(i, j, rightColor);
+                currentImage.put(i, j, rightBorderColor);
             }
         }
+    }
 
+    private void makeTopAndBottomSideBorderWithEdgeColor() {
         for (int i = leftBorderSize; i < leftBorderSize + originalImage.cols(); i++) {
-            double[] topBorderSizeColor = originalImage.get(0, i - leftBorderSize);
+            double[] topBorderColor = originalImage.get(0, i - leftBorderSize);
             for (int j = 0; j < topBorderSize; j++) {
-                currentImage.put(j, i, topBorderSizeColor);
+                currentImage.put(j, i, topBorderColor);
             }
 
-            double[] bottomBorderSizeColor = originalImage.get(originalImage.rows() - 1, i - leftBorderSize);
+            double[] bottomBorderColor = originalImage.get(originalImage.rows() - 1, i - leftBorderSize);
             for (int j = topBorderSize + originalImage.rows(); j < currentImage.rows(); j++) {
-                currentImage.put(j, i, bottomBorderSizeColor);
+                currentImage.put(j, i, bottomBorderColor);
             }
         }
+    }
 
+    private void makeTopCornerBorderWithEdgeColor() {
         for (int i = 0; i < topBorderSize; i++) {
-            double[] leftBorderSizeTopColor = originalImage.get(0, 0);
+            double[] leftTopCornerBorderColor = originalImage.get(0, 0);
             for (int j = 0; j < leftBorderSize; j++) {
-                currentImage.put(i, j, leftBorderSizeTopColor);
+                currentImage.put(i, j, leftTopCornerBorderColor);
             }
 
-            double[] rightTopColor = originalImage.get(0, originalImage.cols() - 1);
+            double[] rightTopCornerBorderColor = originalImage.get(0, originalImage.cols() - 1);
             for (int j = leftBorderSize + originalImage.cols(); j < currentImage.cols(); j++) {
-                currentImage.put(i, j, rightTopColor);
+                currentImage.put(i, j, rightTopCornerBorderColor);
             }
         }
+    }
 
+    private void makeBottomCornerBorderWithEdgeColor() {
         for (int i = topBorderSize + originalImage.rows(); i < currentImage.rows(); i++) {
-            double[] leftBorderSizeBottomColor = originalImage.get(originalImage.rows() - 1, 0);
+            double[] leftBottomCornerBorderColor = originalImage.get(originalImage.rows() - 1, 0);
             for (int j = 0; j < leftBorderSize; j++) {
-                currentImage.put(i, j, leftBorderSizeBottomColor);
+                currentImage.put(i, j, leftBottomCornerBorderColor);
             }
 
-            double[] rightBottomColor = originalImage.get(originalImage.rows() - 1, originalImage.cols() - 1);
+            double[] rightBottomCornerBorderColor = originalImage.get(originalImage.rows() - 1, originalImage.cols() - 1);
             for (int j = leftBorderSize + originalImage.cols(); j < currentImage.cols(); j++) {
-                currentImage.put(i, j, rightBottomColor);
+                currentImage.put(i, j, rightBottomCornerBorderColor);
             }
         }
     }

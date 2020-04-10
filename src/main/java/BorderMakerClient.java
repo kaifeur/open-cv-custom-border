@@ -27,11 +27,7 @@ public class BorderMakerClient {
      */
     public static void main(String[] args) {
         Mat src;
-        new Mat();
-        new Mat();
-        new Mat();
         Mat dstRef = new Mat(), dstConst = new Mat(), dstRep = new Mat(),
-                dstMyRef, dstMyConst, dstMyRep,
                 refDiff = new Mat(), constDiff = new Mat(), repDiff = new Mat();
 
         int top, bottom, left, right;
@@ -76,13 +72,13 @@ public class BorderMakerClient {
 
         //Создание рамок разных типов
         Core.copyMakeBorder(src, dstRef, top, bottom, left, right, Core.BORDER_REFLECT, color);
-        dstMyRef = borderMaker.createImageWithBorder(top, bottom, left, right, border.BorderMaker.BorderType.REFLECT, color);
+        Mat dstMyRef = borderMaker.createImageWithBorder(top, bottom, left, right, BorderMaker.BorderType.REFLECT, color);
 
         Core.copyMakeBorder(src, dstConst, top, bottom, left, right, Core.BORDER_CONSTANT, color);
-        dstMyConst = borderMaker.createImageWithBorder(top, bottom, left, right, border.BorderMaker.BorderType.CONSTANT, color);
+        Mat dstMyConst = borderMaker.createImageWithBorder(top, bottom, left, right, BorderMaker.BorderType.CONSTANT, color);
 
         Core.copyMakeBorder(src, dstRep, top, bottom, left, right, Core.BORDER_REPLICATE, color);
-        dstMyRep = borderMaker.createImageWithBorder(top, bottom, left, right, border.BorderMaker.BorderType.REPLICATE, color);
+        Mat dstMyRep = borderMaker.createImageWithBorder(top, bottom, left, right, BorderMaker.BorderType.REPLICATE, color);
 
         //Создание окон
         HighGui.namedWindow(origReflectWindow, HighGui.WINDOW_AUTOSIZE);
