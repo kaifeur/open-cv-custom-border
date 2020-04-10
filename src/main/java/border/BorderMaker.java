@@ -67,8 +67,6 @@ public class BorderMaker {
      * Добавляет рамку определенного цвета.
      */
     private void makeConstantBorder(final Scalar borderColor) {
-        currentImage = originalImage.clone();
-
         currentImage.rowRange(0, topBorderSize).setTo(borderColor);
         currentImage.rowRange(topBorderSize + originalImage.rows(),
                 currentImage.rows()).setTo(borderColor);
@@ -171,8 +169,6 @@ public class BorderMaker {
      * Добавляет рамку, повторяющую крайний пиксель.
      */
     private void makeReplicateBorder() {
-        currentImage = originalImage.clone();
-
         makeLeftAndRightSideBorderWithEdgeColor();
         makeTopAndBottomSideBorderWithEdgeColor();
         makeTopCornerBorderWithEdgeColor();
