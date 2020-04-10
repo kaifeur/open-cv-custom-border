@@ -16,7 +16,7 @@ public class BorderMakerTest {
     public static final String IMAGE_RESOURCE_NAME = "Lenna.png";
     private Mat image;
 
-    //load OpenCV library (lib needs)
+    //loads OpenCV library (lib needs)
     static {
         nu.pattern.OpenCV.loadShared();
     }

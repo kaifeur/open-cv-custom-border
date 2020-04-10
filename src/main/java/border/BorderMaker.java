@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
  */
 public class BorderMaker {
     private final Logger logger = LoggerFactory.getLogger(BorderMaker.class);
-
     private final Mat originalImage;
+
     private Mat currentImage;
     private int topBorderSize;
     private int bottomBorderSize;

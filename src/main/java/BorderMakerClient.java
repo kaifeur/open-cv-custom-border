@@ -1,37 +1,42 @@
-
-
 import border.BorderMaker;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 
 public class BorderMakerClient {
-    /* Подгружает библиотеку OpenCV() из подключенной зависимости.
+    public static final String LENNA_IMAGE_PATH = "/Users/keet/Lenna.png";
+    public static final int ESCAPE_CODE = 27;
+    private static final Logger logger = LoggerFactory.getLogger(BorderMakerClient.class);
+
+    /*
+     * Loads OpenCV library (lib needs).
      */
     static {
         nu.pattern.OpenCV.loadShared();
     }
 
     /**
-     * Точка входа в программу.
-     * В качестве аргумента можно передать путь до исходного изображения.
-     *
-     * @param args 1 - путь до изображения
+     * @param args 1 - path to the image
      */
     public static void main(String[] args) {
-        Mat src;
-        Mat dstRef = new Mat(), dstConst = new Mat(), dstRep = new Mat(),
-                refDiff = new Mat(), constDiff = new Mat(), repDiff = new Mat();
+        Mat sourceImage;
+        Mat opencvReflectResult = new Mat(),
+                opencvConstResult = new Mat(),
+                opencvReplicateResult = new Mat(),
+                reflectDiff = new Mat(),
+                constantDiff = new Mat(),
+                replicateDiff = new Mat();
 
         int top, bottom, left, right;
 
-        //Имена окон
         String origReflectWindow = "copyMakeBorder - Reflect";
         String myReflectWindow = "border.MyBorder - Reflect";
         String diffReflectWindow = "Diff - Reflect";
@@ -44,42 +49,46 @@ public class BorderMakerClient {
         String myRepWindow = "border.MyBorder - Replicate";
         String diffRepWindow = "Diff - Replicate";
 
-        //Проверка наличия параметра-пути
-        String imageName = ((args.length > 0) ? args[0] : "/Users/keet/Lenna.png");
-        src = imread(imageName, Imgcodecs.IMREAD_COLOR);
+        logger.info("Loading image {}", LENNA_IMAGE_PATH);
+        String imageName = args.length > 0 ? args[0] : LENNA_IMAGE_PATH;
+        sourceImage = imread(imageName, Imgcodecs.IMREAD_COLOR);
 
-        if (src.empty()) {
-            System.out.println("Error opening image!");
-            System.out.println("Program Arguments: [image_name -- default /Users/keet/Lenna.png] \n");
-            System.exit(-1);
+        if (sourceImage.empty()) {
+            logger.error("Error opening image");
+            logger.info("Program Arguments: [image_name -- default {}]", LENNA_IMAGE_PATH);
+            System.exit(42);
         }
 
-        //Размеры рамок
-        top = (int) (0.05 * src.rows());
+        logger.info("Image was loaded successfully");
+
+        top = (int) (0.05 * sourceImage.rows());
         bottom = top;
-        left = (int) (0.05 * src.cols());
+        left = (int) (0.05 * sourceImage.cols());
         right = left;
 
-        //Задание случайного цвета для Constant-рамки
-        Random random = new Random();
-        Scalar color = new Scalar(random.nextInt(256),
-                random.nextInt(256), random.nextInt(256));
+        Scalar color = new Scalar(ThreadLocalRandom.current().nextInt(256),
+                ThreadLocalRandom.current().nextInt(256),
+                ThreadLocalRandom.current().nextInt(256));
 
-        Mat img = new Mat();
-        src.copyTo(img);
-        BorderMaker borderMaker = new BorderMaker(img);
+        Mat sourceImageCopy = new Mat();
+        sourceImage.copyTo(sourceImageCopy);
+        BorderMaker borderMaker = new BorderMaker(sourceImageCopy);
 
-        //Создание рамок разных типов
-        Core.copyMakeBorder(src, dstRef, top, bottom, left, right, Core.BORDER_REFLECT, color);
-        Mat dstMyRef = borderMaker.createImageWithBorder(top, bottom, left, right, BorderMaker.BorderType.REFLECT, color);
+        Core.copyMakeBorder(sourceImage, opencvReflectResult,
+                top, bottom, left, right, Core.BORDER_REFLECT, color);
+        Mat bMakerReflectResult = borderMaker.createImageWithBorder(top, bottom, left, right,
+                BorderMaker.BorderType.REFLECT, color);
 
-        Core.copyMakeBorder(src, dstConst, top, bottom, left, right, Core.BORDER_CONSTANT, color);
-        Mat dstMyConst = borderMaker.createImageWithBorder(top, bottom, left, right, BorderMaker.BorderType.CONSTANT, color);
+        Core.copyMakeBorder(sourceImage, opencvConstResult,
+                top, bottom, left, right, Core.BORDER_CONSTANT, color);
+        Mat bMakerConstantResult = borderMaker.createImageWithBorder(top, bottom, left, right,
+                BorderMaker.BorderType.CONSTANT, color);
 
-        Core.copyMakeBorder(src, dstRep, top, bottom, left, right, Core.BORDER_REPLICATE, color);
-        Mat dstMyRep = borderMaker.createImageWithBorder(top, bottom, left, right, BorderMaker.BorderType.REPLICATE, color);
+        Core.copyMakeBorder(sourceImage, opencvReplicateResult,
+                top, bottom, left, right, Core.BORDER_REPLICATE, color);
+        Mat bMakerReplicateResult = borderMaker.createImageWithBorder(top, bottom, left, right,
+                BorderMaker.BorderType.REPLICATE, color);
 
-        //Создание окон
         HighGui.namedWindow(origReflectWindow, HighGui.WINDOW_AUTOSIZE);
         HighGui.namedWindow(myReflectWindow, HighGui.WINDOW_AUTOSIZE);
         HighGui.namedWindow(diffReflectWindow, HighGui.WINDOW_AUTOSIZE);
@@ -92,27 +101,27 @@ public class BorderMakerClient {
         HighGui.namedWindow(myRepWindow, HighGui.WINDOW_AUTOSIZE);
         HighGui.namedWindow(diffRepWindow, HighGui.WINDOW_AUTOSIZE);
 
-        Core.subtract(dstRef, dstMyRef, refDiff);
-        Core.subtract(dstConst, dstMyConst, constDiff);
-        Core.subtract(dstRep, dstMyRep, repDiff);
+        Core.subtract(opencvReflectResult, bMakerReflectResult, reflectDiff);
+        Core.subtract(opencvConstResult, bMakerConstantResult, constantDiff);
+        Core.subtract(opencvReplicateResult, bMakerReplicateResult, replicateDiff);
 
-        //Цикл отрисовки изображения и ожидания кнопки ESC для выхода
         while (true) {
-            HighGui.imshow(origReflectWindow, dstRef);
-            HighGui.imshow(myReflectWindow, dstMyRef);
-            HighGui.imshow(diffReflectWindow, refDiff);
+            HighGui.imshow(origReflectWindow, opencvReflectResult);
+            HighGui.imshow(myReflectWindow, bMakerReflectResult);
+            HighGui.imshow(diffReflectWindow, reflectDiff);
 
-            HighGui.imshow(origConstWindow, dstConst);
-            HighGui.imshow(myConstWindow, dstMyConst);
-            HighGui.imshow(diffConstWindow, constDiff);
+            HighGui.imshow(origConstWindow, opencvConstResult);
+            HighGui.imshow(myConstWindow, bMakerConstantResult);
+            HighGui.imshow(diffConstWindow, constantDiff);
 
-            HighGui.imshow(origRepWindow, dstRep);
-            HighGui.imshow(myRepWindow, dstMyRep);
-            HighGui.imshow(diffRepWindow, repDiff);
+            HighGui.imshow(origRepWindow, opencvReplicateResult);
+            HighGui.imshow(myRepWindow, bMakerReplicateResult);
+            HighGui.imshow(diffRepWindow, replicateDiff);
 
-            char c = (char) HighGui.waitKey(500);
-            c = Character.toLowerCase(c);
-            if (c == 27) {
+            char pressedKey = (char) HighGui.waitKey(500);
+            pressedKey = Character.toLowerCase(pressedKey);
+            if (pressedKey == ESCAPE_CODE) {
+                logger.info("Escape key was pressed, now exit");
                 break;
             }
         }
