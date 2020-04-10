@@ -1,3 +1,6 @@
+
+
+import border.BorderMaker;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -6,7 +9,9 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 import java.util.Random;
 
-public class BorderMaker {
+import static org.opencv.imgcodecs.Imgcodecs.imread;
+
+public class BorderMakerClient {
     /* Подгружает библиотеку OpenCV() из подключенной зависимости.
      */
     static {
@@ -22,28 +27,31 @@ public class BorderMaker {
      */
     public static void main(String[] args) {
         Mat src;
+        new Mat();
+        new Mat();
+        new Mat();
         Mat dstRef = new Mat(), dstConst = new Mat(), dstRep = new Mat(),
-                dstMyRef = new Mat(), dstMyConst = new Mat(), dstMyRep = new Mat(),
+                dstMyRef, dstMyConst, dstMyRep,
                 refDiff = new Mat(), constDiff = new Mat(), repDiff = new Mat();
 
         int top, bottom, left, right;
 
         //Имена окон
         String origReflectWindow = "copyMakeBorder - Reflect";
-        String myReflectWindow = "MyBorder - Reflect";
+        String myReflectWindow = "border.MyBorder - Reflect";
         String diffReflectWindow = "Diff - Reflect";
 
         String origConstWindow = "copyMakeBorder - Constant";
-        String myConstWindow = "MyBorder - Constant";
+        String myConstWindow = "border.MyBorder - Constant";
         String diffConstWindow = "Diff - Constant";
 
         String origRepWindow = "copyMakeBorder - Replicate";
-        String myRepWindow = "MyBorder - Replicate";
+        String myRepWindow = "border.MyBorder - Replicate";
         String diffRepWindow = "Diff - Replicate";
 
         //Проверка наличия параметра-пути
         String imageName = ((args.length > 0) ? args[0] : "/Users/keet/Lenna.png");
-        src = Imgcodecs.imread(imageName, Imgcodecs.IMREAD_COLOR);
+        src = imread(imageName, Imgcodecs.IMREAD_COLOR);
 
         if (src.empty()) {
             System.out.println("Error opening image!");
@@ -62,15 +70,19 @@ public class BorderMaker {
         Scalar color = new Scalar(random.nextInt(256),
                 random.nextInt(256), random.nextInt(256));
 
+        Mat img = new Mat();
+        src.copyTo(img);
+        BorderMaker borderMaker = new BorderMaker(img);
+
         //Создание рамок разных типов
         Core.copyMakeBorder(src, dstRef, top, bottom, left, right, Core.BORDER_REFLECT, color);
-        MyBorder.makeBorder(src, dstMyRef, top, bottom, left, right, MyBorder.BorderType.REFLECT, color);
+        dstMyRef = borderMaker.createImageWithBorder(top, bottom, left, right, border.BorderMaker.BorderType.REFLECT, color);
 
         Core.copyMakeBorder(src, dstConst, top, bottom, left, right, Core.BORDER_CONSTANT, color);
-        MyBorder.makeBorder(src, dstMyConst, top, bottom, left, right, MyBorder.BorderType.CONSTANT, color);
+        dstMyConst = borderMaker.createImageWithBorder(top, bottom, left, right, border.BorderMaker.BorderType.CONSTANT, color);
 
         Core.copyMakeBorder(src, dstRep, top, bottom, left, right, Core.BORDER_REPLICATE, color);
-        MyBorder.makeBorder(src, dstMyRep, top, bottom, left, right, MyBorder.BorderType.REPLICATE, color);
+        dstMyRep = borderMaker.createImageWithBorder(top, bottom, left, right, border.BorderMaker.BorderType.REPLICATE, color);
 
         //Создание окон
         HighGui.namedWindow(origReflectWindow, HighGui.WINDOW_AUTOSIZE);
